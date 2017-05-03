@@ -33,6 +33,16 @@ alipay.verify(params) # => Promise
     # ...
 ```
 
+## cfg
+
+```yaml
+partner: "xxxxxxxxxxxx" # 合作身份者id，以2088开头的16位纯数字
+key: "3b250072d1e74d8e36c2bab8d3ff2c03" # 安全检验码，以数字和字母组成的32位字符
+seller_email: "abbshrsoufii@gmail.com" # 卖家支付宝帐户 必填
+return_url: "http://10.0.4.65:65531/hook/return"
+notify_url: "http://10.0.4.65:65531/hook/notify"
+```
+
 ## usage
 
 接收支付请求:

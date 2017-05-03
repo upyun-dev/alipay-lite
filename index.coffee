@@ -8,13 +8,12 @@ class Alipay
     partner: ""
     key: ""
     seller_email: ""
-    transport: "http"
+    notify_url: ""
+    return_url: ""
     _input_charset: "utf-8"
     sign_type: "MD5"
     verify_url: "http://notify.alipay.com/trade/notify_query.do"
     gateway: "https://mapi.alipay.com/gateway.do"
-    notify_url: ""
-    return_url: ""
 
   constructor: (cfg = {}) ->
     @cfg = Object.assign @BASIC_CFG, cfg
