@@ -1,0 +1,23 @@
+{
+  "name": "alipay-lite",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.coffee",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "alipay"
+  ],
+  "author": "ran <abbshrsoufii@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^0.16.1"
+  },
+  "devDependencies": {
+    "body-parser": "^1.17.1",
+    "connect": "^3.6.1",
+    "js-yaml": "^3.8.3",
+    "qs": "^6.4.0"
+  }
+}
