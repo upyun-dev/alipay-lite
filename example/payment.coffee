@@ -1,7 +1,7 @@
 require "./yamlc"
 
 Alipay = require ".."
-cfg = require "./conf"
+cfg = require "./config"
 
 { createServer } = require "http"
 body_parser = require "body-parser"
