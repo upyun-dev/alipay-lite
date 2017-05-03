@@ -7,11 +7,17 @@ Alipay-lite
 ## 支付流程
 
 1. 客户端请求业务服务器
-2. 业务服务器根据客户端携带的订单信息, 返回一个 charge 对象, 包含 `gateway`, `method`, `params`. 分别为请求地址, http verb, query string.
-3. 客户端拿到 charge 对象后拼接一个请求 url 或构建一个表单, 通过 method 提交 params 到 gateway.
-4. 支付完成后客户端会自动请求 hook 服务器的同步 `GET` 通知, 拿 query string 做校验, 校验成功后响应客户端自定义信息(比如支付成功等).
+2. 业务服务器根据客户端携带的订单信息, 返回一个 charge 对象.
+3. 客户端拿到 charge 对象后拼接一个 url 或构建一个表单并提交给支付宝.
+4. 支付完成后客户端会被重定向到到配置中定义的 return_url, 通知支付结果给用户.
+   同时地, 支付宝也会发送一个 POST 请求到配置中定义的 notify_url, 通知真实的支付结果给服务器.
+   (最终支付状态以支付宝的 POST 请求为准.)
 
-    hook 服务器同时等待异步 `POST` 通知, 得到后进行校验, 校验成功后响应一个字符串 "success", 并进行后续的自身业务处理(比如保存订单等).
+4注:
+
++ 两种通知方式都需要先进行校验
++ 通过 POST 得到支付状态后, 校验成功需要响应一个字符串 "success", 并进行后续的自身业务处理(比如保存订单等).
++ 对于通过 GET 重定向, 校验成功后可以响应客户端自定义信息(比如支付成功等)
 
 ## API
 ```coffee
@@ -19,6 +25,8 @@ Alipay-lite
 alipay = new Alipay cfg
 
 # 获取 charge 对象, 用于发起下一步支付请求
+# charge 包含 `gateway`, `method`, `params`. 分别为请求地址, http verb, query string.
+# 客户端拿到 charge 对象后拼接一个请求 url 或构建一个表单, 通过 method 提交 params 到 gateway.
 # order 为订单相关信息, 参见 https://doc.open.alipay.com/docs/doc.htm?spm=a219a.7629140.0.0.56xJBr&treeId=62&articleId=104743&docType=1
 alipay.get_charge(order)
 
