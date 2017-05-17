@@ -28,7 +28,7 @@ class Alipay
   # 用于检验 return 和 notify 接口得到的信息的正确性, 返回 true / false
   verify: (params) ->
     @verify_notify_id params.notify_id
-    .then (ret) -> ret is "true" and @verify_sign params
+    .then (ret) -> ret is true and @verify_sign params
 
   create: (order) ->
     { partner, notify_url, return_url, seller_email, _input_charset, sign_type } = @cfg
@@ -48,8 +48,6 @@ class Alipay
     params.sign = @sign params
     params.sign_type = sign_type
     params
-
-    # ("#{k}=#{v}" for k, v of params).join "&"
 
   sign: (params) -> @md5 @concat @sort @filter params
 
