@@ -2,7 +2,7 @@
 axios = require "axios"
 
 # 轻量级 alipay sdk, 目前支持即时到账功能
-# 使用 md5 签名, http 明文数据传输
+# 使用 md5 签名
 class Alipay 
   BASIC_CFG:
     partner: ""
@@ -12,7 +12,6 @@ class Alipay
     return_url: ""
     _input_charset: "utf-8"
     sign_type: "MD5"
-    verify_url: "http://notify.alipay.com/trade/notify_query.do"
     gateway: "https://mapi.alipay.com/gateway.do"
 
   constructor: (cfg = {}) ->
@@ -28,7 +27,7 @@ class Alipay
   # 用于检验 return 和 notify 接口得到的信息的正确性, 返回 true / false
   verify: (params) ->
     @verify_notify_id params.notify_id
-    .then (ret) => ret is true and @verify_sign params
+    .then (ret) => ret and @verify_sign params
 
   create: (order) ->
     { partner, notify_url, return_url, seller_email, _input_charset, sign_type } = @cfg
@@ -52,7 +51,7 @@ class Alipay
   sign: (params) -> @md5 @concat @sort @filter params
 
   verify_notify_id: (notify_id) ->
-    axios.get "#{@cfg.verify_url}?partner=#{@cfg.partner}&notify_id=#{notify_id}"
+    axios.get "#{@cfg.gateway}?service=notify_verify&partner=#{@cfg.partner}&notify_id=#{notify_id}"
     .then ({ data, status }) -> data
 
   verify_sign: (params) ->
