@@ -12,8 +12,8 @@
   "author": "ran <abbshrsoufii@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "axios": "^0.16.1",
-    "coffee-script": "^1.12.6"
+    "coffee-script": "^1.12.6",
+    "moment": "^2.18.1"
   },
   "devDependencies": {
     "body-parser": "^1.17.1",

@@ -1,7 +1,6 @@
 crypto = require "crypto"
-axios = require "axios"
-url = require "url"
 moment = require "moment"
+url = require "url"
 
 # 轻量级 alipay sdk, 目前支持即时到账功能
 # 使用 md5 签名
@@ -14,21 +13,20 @@ class Alipay
     app_private_key: ""
     alipay_public_key: ""
     url: "https://openapi.alipay.com/gateway.do"
-
     notify_url: "/"
     return_url: "/"
-  
-  # 三种支付方式
-  payment_methods:
-    page_pay: "alipay.trade.page.pay"
-    wap_pay: "alipay.trade.wap.pay"
-    app_pay: "alipay.trade.app.pay"
 
-  other_methods:
-    refund: "alipay.trade.refund"
-    pay_query: "alipay.trade.query"
-    refund_query: "alipay.trade.fastpay.refund.query"
-    trade_close: "alipay.trade.close"
+  methods:
+    # 三种支付方式
+    PAYMENT:
+      PAGE_PAY: "alipay.trade.page.pay"
+      WAP_PAY: "alipay.trade.wap.pay"
+      APP_PAY: "alipay.trade.app.pay"
+
+    REFUND: "alipay.trade.refund"
+    PAY_QUERY: "alipay.trade.query"
+    REFUND_QUERY: "alipay.trade.fastpay.refund.query"
+    TRADE_CLOSE: "alipay.trade.close"
 
   constructor: (cfg = {}) ->
     @cfg = Object.assign {}, @basic_cfg, cfg
@@ -46,22 +44,23 @@ class Alipay
     params: @create JSON.stringify(biz_content), pay_type
 
   create: (biz_content, pay_type) ->
+    { PAYMENT } = @methods
     params = Object.assign {
       biz_content
       version: "1.0"
       product_code: "FAST_INSTANT_TRADE_PAY"
-      method: @payment_methods[pay_type] ? @payment_methods.page_pay
+      method: PAYMENT[pay_type] ? PAYMENT.page_pay
       timestamp: moment().format "YYYY-MM-DD HH:mm:ss"
     }, @cfg
 
-    delete params.return_url if pay_type is "app_pay"
+    delete params.return_url if pay_type is "APP_PAY"
 
     params.sign = @sign params
     params
 
   sign: (params) ->
     delete params.sign
-    @create_signature @sort params
+    @create_signature @concat @sort params
 
   # 异步通知校验签名
   verify: (params) ->
@@ -69,20 +68,22 @@ class Alipay
     delete params.sign
     delete params.sign_type
     decoded_sign = @btoa sign
-    params_str = @sort params
-    @signature_verify params_str, decoded_sign
+    @signature_verify decoded_sign, @concat @sort params
 
   sort: (params) ->
     "#{k}=#{params[k]}" for k in Object.keys(params).sort()
+
+  concat: (seq) ->
+    seq.join "&"
 
   create_signature: (plaintext) ->
     signed_stream = crypto.createSign "RSA-SHA256"
     signed_stream.update plaintext
     signed_stream.sign @cfg.app_private_key, "base64"
 
-  signature_verify: (params_str, signature) ->
+  signature_verify: (signature, plaintext) ->
     verfied_stream = crypto.createVerify "RSA-SHA256"
-    verfied_stream.update params_str
+    verfied_stream.update plaintext
     verfied_stream.verify @cfg.alipay_public_key, signature
 
   btoa: (base64_str) -> Buffer(base64_str, "base64").toString "utf-8"

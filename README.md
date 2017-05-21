@@ -1,14 +1,14 @@
 Alipay-lite
 ===
 
-轻量级 SDK, 支持即时到账功能.
-使用 md5 散列签名, http 明文通讯.
+轻量级 SDK, 支持支付宝新版支付功能.
+使用官方推荐的 RSA2 签名算法(`"RSA-SHA256"`).
 
-新旧接口对比: https://doc.open.alipay.com/docs/doc.htm?docType=1&articleId=106759
-签名流程: https://doc.open.alipay.com/docs/doc.htm?docType=1&articleId=106118
-签名校验流程: https://doc.open.alipay.com/docs/doc.htm?treeId=270&articleId=105902&docType=1#s7
-同步跳转参数: https://doc.open.alipay.com/doc2/detail.htm?treeId=270&articleId=105901&docType=1#s3
-异步通知参数: https://doc.open.alipay.com/docs/doc.htm?treeId=270&articleId=105902&docType=1#s0
++ 新旧接口对比: https://doc.open.alipay.com/docs/doc.htm?docType=1&articleId=106759
++ 签名流程: https://doc.open.alipay.com/docs/doc.htm?docType=1&articleId=106118
++ 签名校验流程: https://doc.open.alipay.com/docs/doc.htm?treeId=270&articleId=105902&docType=1#s7
++ 同步跳转参数: https://doc.open.alipay.com/doc2/detail.htm?treeId=270&articleId=105901&docType=1#s3
++ 异步通知参数: https://doc.open.alipay.com/docs/doc.htm?treeId=270&articleId=105902&docType=1#s0
 
 ## 支付流程
 
@@ -21,7 +21,7 @@ Alipay-lite
 
 4注:
 
-+ 两种通知方式都需要先进行校验
++ 异步通知方式需要先进行校验
 + 通过 POST 得到支付状态后, 校验成功需要响应一个字符串 "success", 并进行后续的自身业务处理(比如保存订单等).
 + 对于通过 GET 重定向, 校验成功后可以响应客户端自定义信息(比如支付成功等)
 
@@ -34,7 +34,7 @@ alipay = new Alipay cfg
 # charge 包含 `gateway`, `method`, `params`. 分别为请求地址, http verb, query string.
 # 客户端拿到 charge 对象后拼接一个请求 url 或构建一个表单, 通过 method 提交 params 到 gateway.
 # order 为订单相关信息, 参见 https://doc.open.alipay.com/docs/doc.htm?spm=a219a.7629140.0.0.56xJBr&treeId=62&articleId=104743&docType=1
-alipay.get_charge(order)
+alipay.get_charge(order, pay_type)
 
 # 验证请求方身份及数据一致性与正确性 (是否来自 alibaba, 订单是否正确)
 # params 为 body 或 query object, 参见 example
