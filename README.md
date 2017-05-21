@@ -4,6 +4,12 @@ Alipay-lite
 轻量级 SDK, 支持即时到账功能.
 使用 md5 散列签名, http 明文通讯.
 
+新旧接口对比: https://doc.open.alipay.com/docs/doc.htm?docType=1&articleId=106759
+签名流程: https://doc.open.alipay.com/docs/doc.htm?docType=1&articleId=106118
+签名校验流程: https://doc.open.alipay.com/docs/doc.htm?treeId=270&articleId=105902&docType=1#s7
+同步跳转参数: https://doc.open.alipay.com/doc2/detail.htm?treeId=270&articleId=105901&docType=1#s3
+异步通知参数: https://doc.open.alipay.com/docs/doc.htm?treeId=270&articleId=105902&docType=1#s0
+
 ## 支付流程
 
 1. 客户端请求业务服务器

@@ -1,77 +1,91 @@
-{ createHash } = require "crypto"
+crypto = require "crypto"
 axios = require "axios"
+url = require "url"
+moment = require "moment"
 
 # 轻量级 alipay sdk, 目前支持即时到账功能
 # 使用 md5 签名
 class Alipay 
-  BASIC_CFG:
-    partner: ""
-    key: ""
-    seller_email: ""
-    notify_url: ""
-    return_url: ""
-    _input_charset: "utf-8"
-    sign_type: "MD5"
-    gateway: "https://mapi.alipay.com/gateway.do"
+  basic_cfg:
+    app_id: ""
+    format: "json"
+    charset: "utf-8"
+    sign_type: "RSA2"
+    app_private_key: ""
+    alipay_public_key: ""
+    url: "https://openapi.alipay.com/gateway.do"
+
+    notify_url: "/"
+    return_url: "/"
+  
+  # 三种支付方式
+  payment_methods:
+    page_pay: "alipay.trade.page.pay"
+    wap_pay: "alipay.trade.wap.pay"
+    app_pay: "alipay.trade.app.pay"
+
+  other_methods:
+    refund: "alipay.trade.refund"
+    pay_query: "alipay.trade.query"
+    refund_query: "alipay.trade.fastpay.refund.query"
+    trade_close: "alipay.trade.close"
 
   constructor: (cfg = {}) ->
-    @cfg = Object.assign @BASIC_CFG, cfg
+    @cfg = Object.assign {}, @basic_cfg, cfg
 
-  # 用于请求支付界面
-  get_charge: (order) ->
-    method: "get"
-    gateway: @cfg.gateway
-    params: @create order
+    for attr_name in ["notify_url", "return_url"]
+      { protocol, hostname } = url.parse @cfg[attr_name]
+      unless protocol? and hostname?
+        @cfg[attr_name] = "http://#{@cfg.host}#{@cfg.notify_url}"
 
-  # Promisify
-  # 用于检验 return 和 notify 接口得到的信息的正确性, 返回 true / false
-  verify: (params) ->
-    @verify_notify_id params.notify_id
-    .then (ret) => ret and @verify_sign params
+  # 创建订单
+  get_charge: (biz_content, pay_type = "page_pay") ->
+    method: "POST"
+    url: @cfg.url
+    charset: @cfg.charsetalipay.trade.app.pay
+    params: @create JSON.stringify(biz_content), pay_type
 
-  create: (order) ->
-    { partner, notify_url, return_url, seller_email, _input_charset, sign_type } = @cfg
+  create: (biz_content, pay_type) ->
+    params = Object.assign {
+      biz_content
+      version: "1.0"
+      product_code: "FAST_INSTANT_TRADE_PAY"
+      method: @payment_methods[pay_type] ? @payment_methods.page_pay
+      timestamp: moment().format "YYYY-MM-DD HH:mm:ss"
+    }, @cfg
 
-    params = {
-      service: "create_direct_pay_by_user"
-      payment_type: "1"
+    delete params.return_url if pay_type is "app_pay"
 
-      partner
-      notify_url
-      return_url
-      seller_email
-      _input_charset
-    }
-
-    params = Object.assign params, order
     params.sign = @sign params
-    params.sign_type = sign_type
     params
 
-  sign: (params) -> @md5 @concat @sort @filter params
+  sign: (params) ->
+    delete params.sign
+    @create_signature @sort params
 
-  verify_notify_id: (notify_id) ->
-    axios.get "#{@cfg.gateway}?service=notify_verify&partner=#{@cfg.partner}&notify_id=#{notify_id}"
-    .then ({ data, status }) -> data
-
-  verify_sign: (params) ->
+  # 异步通知校验签名
+  verify: (params) ->
     { sign } = params
-    sign is @sign params
-
-  filter: (params) ->
     delete params.sign
     delete params.sign_type
-    params
+    decoded_sign = @btoa sign
+    params_str = @sort params
+    @signature_verify params_str, decoded_sign
 
   sort: (params) ->
     "#{k}=#{params[k]}" for k in Object.keys(params).sort()
 
-  concat: (seq) ->
-    "#{seq.join '&'}#{@cfg.key}"
+  create_signature: (plaintext) ->
+    signed_stream = crypto.createSign "RSA-SHA256"
+    signed_stream.update plaintext
+    signed_stream.sign @cfg.app_private_key, "base64"
 
-  md5: (plaintext) ->
-    createHash "md5"
-    .update plaintext, "utf-8"
-    .digest "hex"
+  signature_verify: (params_str, signature) ->
+    verfied_stream = crypto.createVerify "RSA-SHA256"
+    verfied_stream.update params_str
+    verfied_stream.verify @cfg.alipay_public_key, signature
+
+  btoa: (base64_str) -> Buffer(base64_str, "base64").toString "utf-8"
+  atob: (text) -> Buffer(text).toString "base64"
 
 module.exports = Alipay
