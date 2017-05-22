@@ -1,10 +1,17 @@
 crypto = require "crypto"
 moment = require "moment"
+axios = require "axios"
 url = require "url"
 
-# 轻量级 alipay sdk, 目前支持即时到账功能
-# 使用 md5 签名
-class Alipay 
+# 轻量级 alipay sdk, 支持 app 支付, 手机/电脑网站支付, 支付查询, 退款, 退款查询
+# 签名支持 alipay 的 RSA 和 RSA2
+class Alipay
+  digest_algorithms:
+    "RSA": "RSA-SHA1"
+    "RSA2": "RSA-SHA256"
+
+  url: "https://openapi.alipay.com/gateway.do"
+
   basic_cfg:
     app_id: ""
     format: "json"
@@ -12,7 +19,6 @@ class Alipay
     sign_type: "RSA2"
     app_private_key: ""
     alipay_public_key: ""
-    url: "https://openapi.alipay.com/gateway.do"
     notify_url: "/"
     return_url: "/"
 
@@ -26,7 +32,6 @@ class Alipay
     REFUND: "alipay.trade.refund"
     PAY_QUERY: "alipay.trade.query"
     REFUND_QUERY: "alipay.trade.fastpay.refund.query"
-    TRADE_CLOSE: "alipay.trade.close"
 
   constructor: (cfg = {}) ->
     @cfg = Object.assign {}, @basic_cfg, cfg
@@ -37,11 +42,44 @@ class Alipay
         @cfg[attr_name] = "http://#{@cfg.host}#{@cfg.notify_url}"
 
   # 创建订单
-  get_charge: (biz_content, pay_type = "page_pay") ->
+  get_charge: (biz_content, pay_type) ->
     method: "POST"
-    url: @cfg.url
-    charset: @cfg.charsetalipay.trade.app.pay
+    url: @url
+    charset: @cfg.charset
     params: @create_order JSON.stringify(biz_content), pay_type
+
+  # 异步通知校验签名
+  verify: (params) ->
+    { sign } = params
+    params = @wash params, ["sign", "sign_type"]
+    decoded_sign = @btoa sign
+    @signature_verify decoded_sign, @concat @sort params
+
+  # 退款
+  refund: (biz_content) -> @common_request biz_content, "REFUND"
+
+  # 支付结果查询
+  query_payment: (biz_content) -> @common_request biz_content, "PAY_QUERY"
+
+  # 退款查询
+  query_refund: (biz_content) -> @common_request biz_content, "REFUND_QUERY"
+
+  common_request: (biz_content, method_constant) ->
+    params = Object.assign {
+      biz_content
+      version: "1.0"
+      method: @methods[method_constant]
+      timestamp: moment().format "YYYY-MM-DD HH:mm:ss"
+    }, @cfg
+
+    params = @wash params, ["app_private_key", "alipay_public_key", "notify_url", "return_url"]
+    params.sign = @sign params
+    axios.get @url, { params }
+
+  wash: (object, attrs_to_remove = []) ->
+    cloned = {}
+    cloned[k] = v for own k, v of object when k not in attrs_to_remove
+    cloned
 
   create_order: (biz_content, pay_type) ->
     { PAYMENT } = @methods
@@ -49,26 +87,18 @@ class Alipay
       biz_content
       version: "1.0"
       product_code: "FAST_INSTANT_TRADE_PAY"
-      method: PAYMENT[pay_type] ? PAYMENT.page_pay
+      method: PAYMENT[pay_type] ? PAYMENT.PAGE_PAY
       timestamp: moment().format "YYYY-MM-DD HH:mm:ss"
     }, @cfg
 
-    delete params.return_url if pay_type is "APP_PAY"
+    params = @wash params, ["return_url"] if pay_type is "APP_PAY"
 
     params.sign = @sign params
     params
 
   sign: (params) ->
-    delete params.sign
+    params = @wash params, ["sign"]
     @create_signature @concat @sort params
-
-  # 异步通知校验签名
-  verify: (params) ->
-    { sign } = params
-    delete params.sign
-    delete params.sign_type
-    decoded_sign = @btoa sign
-    @signature_verify decoded_sign, @concat @sort params
 
   sort: (params) ->
     "#{k}=#{params[k]}" for k in Object.keys(params).sort()
@@ -77,12 +107,12 @@ class Alipay
     seq.join "&"
 
   create_signature: (plaintext) ->
-    signed_stream = crypto.createSign "RSA-SHA256"
+    signed_stream = crypto.createSign @digest_algorithms[@cfg.sign_type]
     signed_stream.update plaintext
     signed_stream.sign @cfg.app_private_key, "base64"
 
   signature_verify: (signature, plaintext) ->
-    verfied_stream = crypto.createVerify "RSA-SHA256"
+    verfied_stream = crypto.createVerify @digest_algorithms[@cfg.sign_type]
     verfied_stream.update plaintext
     verfied_stream.verify @cfg.alipay_public_key, signature
 
