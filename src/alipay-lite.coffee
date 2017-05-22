@@ -41,9 +41,9 @@ class Alipay
     method: "POST"
     url: @cfg.url
     charset: @cfg.charsetalipay.trade.app.pay
-    params: @create JSON.stringify(biz_content), pay_type
+    params: @create_order JSON.stringify(biz_content), pay_type
 
-  create: (biz_content, pay_type) ->
+  create_order: (biz_content, pay_type) ->
     { PAYMENT } = @methods
     params = Object.assign {
       biz_content
