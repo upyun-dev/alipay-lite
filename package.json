@@ -13,6 +13,7 @@
   "author": "ran <abbshrsoufii@gmail.com>",
   "license": "MIT",
   "dependencies": {
+    "axios": "^0.16.1",
     "coffeescript": "^2.0.0-beta2",
     "moment": "^2.18.1"
   },
