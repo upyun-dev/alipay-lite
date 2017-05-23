@@ -13,8 +13,9 @@ class Alipay
   url: "https://openapi.alipay.com/gateway.do"
 
   basic_cfg:
+    host: ""
     app_id: ""
-    format: "json"
+    format: "JSON"
     charset: "utf-8"
     sign_type: "RSA2"
     app_private_key: ""
@@ -39,14 +40,14 @@ class Alipay
     for attr_name in ["notify_url", "return_url"]
       { protocol, hostname } = url.parse @cfg[attr_name]
       unless protocol? and hostname?
-        @cfg[attr_name] = "http://#{@cfg.host}#{@cfg.notify_url}"
+        @cfg[attr_name] = "http://#{@cfg.host}#{@cfg[attr_name]}"
 
   # 创建订单
   get_charge: (biz_content, pay_type) ->
     method: "POST"
     url: @url
     charset: @cfg.charset
-    params: @create_order JSON.stringify(biz_content), pay_type
+    params: @create_order biz_content, pay_type
 
   # 异步通知校验签名
   verify: (params) ->
@@ -72,7 +73,7 @@ class Alipay
       timestamp: moment().format "YYYY-MM-DD HH:mm:ss"
     }, @cfg
 
-    params = @wash params, ["app_private_key", "alipay_public_key", "notify_url", "return_url"]
+    params = @wash params, ["host", "app_private_key", "alipay_public_key", "notify_url", "return_url"]
     params.sign = @sign params
     axios.get @url, { params }
 
@@ -83,14 +84,16 @@ class Alipay
 
   create_order: (biz_content, pay_type) ->
     { PAYMENT } = @methods
+    Object.assign biz_content, product_code: "FAST_INSTANT_TRADE_PAY"
+    biz_content = JSON.stringify biz_content
     params = Object.assign {
       biz_content
       version: "1.0"
-      product_code: "FAST_INSTANT_TRADE_PAY"
       method: PAYMENT[pay_type] ? PAYMENT.PAGE_PAY
       timestamp: moment().format "YYYY-MM-DD HH:mm:ss"
     }, @cfg
 
+    params = @wash params, ["host", "app_private_key", "alipay_public_key"]
     params = @wash params, ["return_url"] if pay_type is "APP_PAY"
 
     params.sign = @sign params
