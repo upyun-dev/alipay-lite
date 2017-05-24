@@ -23,17 +23,23 @@ Alipay-lite
 
 + 异步通知方式需要先进行校验
 + 通过 POST 得到支付状态后, 校验成功需要响应一个字符串 "success", 并进行后续的自身业务处理(比如保存订单等).
-+ 对于通过 GET 重定向, 校验成功后可以响应客户端自定义信息(比如支付成功等)
++ 支付宝服务器会不断重发通知，直到超过24小时22分钟。一般情况下，25小时以内完成8次通知（通知的间隔频率一般是：4m,10m,10m,1h,2h,6h,15h）；
++ 该方式的作用主要防止订单丢失，即页面跳转同步通知没有处理订单更新，它则去处理；
++ 当商户收到服务器异步通知并打印出success时，服务器异步通知参数notify_id才会失效。也就是说在支付宝发送同一条异步通知时（包含商户并未成功打印出success导致支付宝重发数次通知），服务器异步通知参数notify_id是不变的。
+
++ 对于通过 GET 重定向, 可以响应客户端自定义信息(比如支付成功/正在处理订单等)
 
 ## API
 ```coffee
-# cfg 对象见 example
+# cfg 对象见 example / src
+Alipay = require "alipay-lite"
 alipay = new Alipay cfg
 
 # 获取 charge 对象, 用于发起下一步支付请求
-# charge 包含 `gateway`, `method`, `params`. 分别为请求地址, http verb, query string.
-# 客户端拿到 charge 对象后拼接一个请求 url 或构建一个表单, 通过 method 提交 params 到 gateway.
-# order 为订单相关信息, 参见 https://doc.open.alipay.com/docs/doc.htm?spm=a219a.7629140.0.0.56xJBr&treeId=62&articleId=104743&docType=1
+# charge 包含 `url`, `method`, `charset`, `params`. 分别为请求地址, http verb, 字符集, query string.
+# 客户端拿到 charge 对象后拼接一个请求 url 或构建一个表单, 通过 method 提交 params 到 url.
+# pay_type 根据客户端环境可选择 "PAGE_PAY", "WAP_PAY", "APP_PAY", 分别为电脑网页, 手机网页, 手机app
+
 alipay.get_charge(order, pay_type)
 
 # 验证请求方身份及数据一致性与正确性 (是否来自 alibaba, 订单是否正确)
@@ -50,11 +56,15 @@ alipay.verify(params) # => Promise
 ## cfg
 
 ```yaml
-partner: "xxxxxxxxxxxx" # 合作身份者id，以2088开头的16位纯数字
-key: "3b250072d1e74d8e36c2bab8d3ff2c03" # 安全检验码，以数字和字母组成的32位字符
-seller_email: "abbshrsoufii@gmail.com" # 卖家支付宝帐户 必填
-return_url: "http://10.0.4.65:65531/hook/return"
-notify_url: "http://10.0.4.65:65531/hook/notify"
+host: "localhost:2333"
+app_id: ""
+format: "JSON"
+charset: "utf-8"
+sign_type: "RSA2"
+app_private_key: ""
+alipay_public_key: ""
+notify_url: "/hook/notify"
+return_url: "/hook/return"
 ```
 
 ## usage
@@ -66,13 +76,13 @@ router.use "/pay", (req, res) ->
   order =
     out_trade_no: "123456" # 商户订单号, 商户网站订单系统中唯一订单号，必填
     subject: "测试订单" # 订单名称 必填
-    total_fee: "0.01" # 付款金额,必填
+    total_amount: "0.01" # 付款金额,必填
     body: "支付测试使用" # 订单描述
 
   res.setHeader "Content-Type", "application/json"
   # 返回客户端 charge 对象, 由客户端决定如何发起请求.
   # 最简单方式为构建表单, 提交后重定向到支付页面
-  res.end JSON.stringify alipay.get_charge(order), null, 2
+  res.end JSON.stringify alipay.get_charge(order, "PAGE_PAY"), null, 2
 ```
 
 接收异步通知:
