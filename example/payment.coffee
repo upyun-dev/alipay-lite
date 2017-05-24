@@ -16,7 +16,7 @@ alipay = new Alipay
   app_private_key: fs.readFileSync "./server-key.pem", "utf-8"
   alipay_public_key: fs.readFileSync "./server-pkkey.pem", "utf-8"
   notify_url: "/hook/notify"
-  return_url: "/hook/return"
+  # return_url: "/hook/return"
 
 # 接收支付宝的支付结果
 hook = connect()
@@ -64,7 +64,7 @@ router.use "/pay", (req, res) ->
   res.setHeader "Content-Type", "application/json"
   # 返回客户端 charge 对象, 由客户端决定如何发起请求.
   # 最简单方式为构建表单, 提交后重定向到支付页面
-  res.end JSON.stringify alipay.get_charge(order, "APP_PAY"), null, 2
+  res.end JSON.stringify alipay.get_charge(order), null, 2
 
   # 其他可用 order 参数
     # show_url: "http://upyun.com" # 商品展示地址 需以http://开头的完整路径，例如：http://www.xxx.com/myorder.html

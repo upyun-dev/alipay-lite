@@ -36,7 +36,7 @@ class Alipay
   constructor: (cfg = {}) ->
     @cfg = Object.assign {}, @basic_cfg, cfg
 
-    for attr_name in ["notify_url", "return_url"]
+    for attr_name in ["notify_url", "return_url"] when attr_name of @cfg
       { protocol, hostname } = url.parse @cfg[attr_name]
       @cfg[attr_name] = "#{@cfg.host}#{@cfg[attr_name]}" unless hostname? and protocol?
 
