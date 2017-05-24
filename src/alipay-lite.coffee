@@ -38,8 +38,7 @@ class Alipay
 
     for attr_name in ["notify_url", "return_url"]
       { protocol, hostname } = url.parse @cfg[attr_name]
-      @cfg[attr_name] = "#{@cfg.host}#{@cfg[attr_name]}" unless hostname?
-      @cfg[attr_name] = "http://#{@cfg[attr_name]}" unless protocol?
+      @cfg[attr_name] = "#{@cfg.host}#{@cfg[attr_name]}" unless hostname? and protocol?
 
   # 创建订单
   get_charge: (biz_content, pay_type) ->

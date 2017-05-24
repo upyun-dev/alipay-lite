@@ -11,7 +11,7 @@ qs = require "qs"
 fs = require "fs"
 
 alipay = new Alipay
-  host: "localhost:65531"
+  host: "http://localhost:65531"
   app_id: "2088511441334570"
   app_private_key: fs.readFileSync "./server-key.pem", "utf-8"
   alipay_public_key: fs.readFileSync "./server-pkkey.pem", "utf-8"
