@@ -10,18 +10,17 @@ class Alipay
     "RSA": "RSA-SHA1"
     "RSA2": "RSA-SHA256"
 
-  url: "https://openapi.alipay.com/gateway.do"
-
   basic_cfg:
+    url: "https://openapi.alipay.com/gateway.do"
     host: ""
     app_id: ""
-    format: "JSON"
-    charset: "utf-8"
+    # format: "JSON"
+    charset: "UTF-8"
     sign_type: "RSA2"
     app_private_key: ""
     alipay_public_key: ""
     notify_url: "/"
-    return_url: "/"
+    # return_url: "/"
 
   methods:
     # 三种支付方式
@@ -39,13 +38,13 @@ class Alipay
 
     for attr_name in ["notify_url", "return_url"]
       { protocol, hostname } = url.parse @cfg[attr_name]
-      unless protocol? and hostname?
-        @cfg[attr_name] = "http://#{@cfg.host}#{@cfg[attr_name]}"
+      @cfg[attr_name] = "#{@cfg.host}#{@cfg[attr_name]}" unless hostname?
+      @cfg[attr_name] = "http://#{@cfg[attr_name]}" unless protocol?
 
   # 创建订单
   get_charge: (biz_content, pay_type) ->
     method: "POST"
-    url: @url
+    url: @cfg.url
     charset: @cfg.charset
     params: @create_order biz_content, pay_type
 
@@ -73,9 +72,9 @@ class Alipay
       timestamp: moment().format "YYYY-MM-DD HH:mm:ss"
     }, @cfg
 
-    params = @wash params, ["host", "app_private_key", "alipay_public_key", "notify_url", "return_url"]
+    params = @wash params, ["url", "host", "app_private_key", "alipay_public_key", "notify_url", "return_url"]
     params.sign = @sign params
-    axios.get @url, { params }
+    axios.get @cfg.url, { params }
 
   wash: (object, attrs_to_remove = []) ->
     cloned = {}
@@ -93,7 +92,7 @@ class Alipay
       timestamp: moment().format "YYYY-MM-DD HH:mm:ss"
     }, @cfg
 
-    params = @wash params, ["host", "app_private_key", "alipay_public_key"]
+    params = @wash params, ["url", "host", "app_private_key", "alipay_public_key"]
     params = @wash params, ["return_url"] if pay_type is "APP_PAY"
 
     params.sign = @sign params
