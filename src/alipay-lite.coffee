@@ -24,7 +24,7 @@ class Alipay
 
   methods:
     # 三种支付方式
-    PAYMENT:
+    payment:
       PAGE_PAY: "alipay.trade.page.pay"
       WAP_PAY: "alipay.trade.wap.pay"
       APP_PAY: "alipay.trade.app.pay"
@@ -65,7 +65,7 @@ class Alipay
 
   common_request: (biz_content, method_constant) ->
     params = Object.assign {
-      biz_content
+      biz_content: JSON.stringify biz_content
       version: "1.0"
       method: @methods[method_constant]
       timestamp: moment().format "YYYY-MM-DD HH:mm:ss"
@@ -81,13 +81,12 @@ class Alipay
     cloned
 
   create_order: (biz_content, pay_type) ->
-    { PAYMENT } = @methods
+    { payment } = @methods
     Object.assign biz_content, product_code: "FAST_INSTANT_TRADE_PAY"
-    biz_content = JSON.stringify biz_content
     params = Object.assign {
-      biz_content
+      biz_content: JSON.stringify biz_content
       version: "1.0"
-      method: PAYMENT[pay_type] ? PAYMENT.PAGE_PAY
+      method: payment[pay_type] ? payment.PAGE_PAY
       timestamp: moment().format "YYYY-MM-DD HH:mm:ss"
     }, @cfg
 
