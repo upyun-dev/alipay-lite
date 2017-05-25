@@ -16,7 +16,10 @@ Alipay-lite
 
 4注:
 
-+ 异步通知的请求参数见文档: https://doc.open.alipay.com/docs/doc.htm?treeId=270&articleId=105902&docType=1#s0
++ 异步通知的请求参数见文档: 
+  - PAGE_PAY: https://doc.open.alipay.com/docs/doc.htm?treeId=270&articleId=105902&docType=1#s0
+  - WAP_PAY: https://doc.open.alipay.com/docs/doc.htm?spm=a219a.7629140.0.0.YEqKzK&treeId=193&articleId=105286&docType=
+  - APP_PAY: https://doc.open.alipay.com/docs/doc.htm?spm=a219a.7629140.0.0.KK3V4L&treeId=193&articleId=105301&docType=1
 + 异步通知方式需要先进行校验
 + 通过 POST 得到支付状态后, 校验成功需要响应一个字符串 "success", 并进行后续的自身业务处理(比如保存订单等).
 + 支付宝服务器会不断重发通知，直到超过24小时22分钟。一般情况下，25小时以内完成8次通知（通知的间隔频率一般是：4m,10m,10m,1h,2h,6h,15h）；
