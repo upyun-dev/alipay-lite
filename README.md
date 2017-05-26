@@ -16,9 +16,9 @@ Alipay-lite
 
 4注:
 
-+ 异步通知的请求参数见文档: 
++ 异步通知的请求参数见文档:
   - PAGE_PAY: https://doc.open.alipay.com/docs/doc.htm?treeId=270&articleId=105902&docType=1#s0
-  - WAP_PAY: https://doc.open.alipay.com/docs/doc.htm?spm=a219a.7629140.0.0.YEqKzK&treeId=193&articleId=105286&docType=
+  - WAP_PAY: https://doc.open.alipay.com/docs/doc.htm?spm=a219a.7629140.0.0.YEqKzK&treeId=193&articleId=105286&docType=1
   - APP_PAY: https://doc.open.alipay.com/docs/doc.htm?spm=a219a.7629140.0.0.KK3V4L&treeId=193&articleId=105301&docType=1
 + 异步通知方式需要先进行校验
 + 通过 POST 得到支付状态后, 校验成功需要响应一个字符串 "success", 并进行后续的自身业务处理(比如保存订单等).
