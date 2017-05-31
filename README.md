@@ -76,6 +76,18 @@ alipay.query_payment(request_params) # => axios Promise
 # https://doc.open.alipay.com/docs/api.htm?docType=4&apiId=759
 # 文档的 "请求参数" 一节
 alipay.query_refund(request_params) # => axios Promise
+
+# 转账
+# request_params 对象内容见: 
+http://doc.open.alipay.com/docs/api.htm?spm=a219a.7395905.0.0.5tfkBr&docType=4&apiId=1321 
+# 文档的 "请求参数" 一节
+alipay.transfer(request_params) # => axios Promise
+
+# 转账查询
+# request_params 对象内容见: 
+https://doc.open.alipay.com/docs/api.htm?spm=a219a.7395905.0.0.NQF6tW&docType=4&apiId=1322
+# 文档的 "请求参数" 一节
+alipay.transfer_query(request_params) # => axios Promise
 ```
 
 ## cfg

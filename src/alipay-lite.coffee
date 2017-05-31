@@ -32,6 +32,8 @@ class Alipay
     REFUND: "alipay.trade.refund"
     PAY_QUERY: "alipay.trade.query"
     REFUND_QUERY: "alipay.trade.fastpay.refund.query"
+    TRANSFER: "alipay.fund.trans.toaccount.transfer"
+    TRANSFER_QUERY: "alipay.fund.trans.order.query"
 
   constructor: (cfg = {}) ->
     @cfg = Object.assign {}, @basic_cfg, cfg
@@ -62,6 +64,12 @@ class Alipay
 
   # 退款查询
   query_refund: (biz_content) -> @common_request biz_content, "REFUND_QUERY"
+
+  # 单笔转账
+  transfer: (biz_content) -> @common_request biz_content, "TRANSFER"
+
+  # 转账查询
+  transfer_query: (biz_content) -> @common_request biz_content, "TRANSFER_QUERY"
 
   common_request: (biz_content, method_constant) ->
     params = Object.assign {
