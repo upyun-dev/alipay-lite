@@ -1,6 +1,6 @@
 try {
   module.exports = require("./lib/alipay-lite");
 } catch (e) {
-  require("coffee-script/register");
+  require("coffeescript/register");
   module.exports = require("./src/alipay-lite");
 }
