@@ -30,25 +30,25 @@ hook.use body_parser.json()
 hook.use "/hook/notify", (req, res) ->
   res.end "failure" if req.method isnt "POST"
 
-  alipay.verify req.body
-  .then (verify_ret) ->
-    return res.end "failure" unless verify_ret
-    # custom logic
-    console.log req.body
-    # if logic procss successfully
-    res.end "success"
+  verify_ret = await alipay.verify req.body
+  #.then (verify_ret) ->
+  return res.end "failure" unless verify_ret
+  # custom logic
+  console.log req.body
+  # if logic procss successfully
+  res.end "success"
 
 # 客户端接收成功后请求页面跳转
 hook.use "/hook/return", (req, res) ->
   res.end "failure" if req.method isnt "GET"
 
-  alipay.verify req.query
-  .then (verify_ret) ->
-    return res.end "failure" unless verify_ret
-    # another custom logic
-    console.log req.query
-    # if logic procss successfully
-    res.end "success"
+  verify_ret = await alipay.verify req.query
+  #.then (verify_ret) ->
+  return res.end "failure" unless verify_ret
+  # another custom logic
+  console.log req.query
+  # if logic procss successfully
+  res.end "success"
 
 # 提供支付服务
 router = connect()

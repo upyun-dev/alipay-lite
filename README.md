@@ -103,6 +103,8 @@ alipay_public_key: "" # 支付宝提供的公钥
 notify_url: "http://example.com/hook/notify" # 仅仅在 APP_PAY 中为必须选项
 ```
 
+上述参数可以从如下文档查阅: https://doc.open.alipay.com/docs/doc.htm?spm=a219a.7629140.0.0.Ns8q7V&treeId=200&articleId=105310&docType=1
+
 可选:
 ```yaml
 host: "localhost:2333" # notify 服务器地址, 如果没有在 notify_url 中配置 host, 那么这里需要配置.
