@@ -90,6 +90,37 @@ https://doc.open.alipay.com/docs/api.htm?spm=a219a.7395905.0.0.NQF6tW&docType=4&
 alipay.transfer_query(request_params) # => axios Promise
 ```
 
+## axios Promise
+
+详见: https://github.com/mzabriskie/axios#response-schema
+
+example:
+
+```js
+{
+  // `data` is the response that was provided by the server
+  data: {},
+
+  // `status` is the HTTP status code from the server response
+  status: 200,
+
+  // `statusText` is the HTTP status message from the server response
+  statusText: 'OK',
+
+  // `headers` the headers that the server responded with
+  // All header names are lower cased
+  headers: {},
+
+  // `config` is the config that was provided to `axios` for the request
+  config: {},
+
+  // `request` is the request that generated this response
+  // It is the last ClientRequest instance in node.js (in redirects)
+  // and an XMLHttpRequest instance the browser
+  request: {}
+}
+```
+
 ## cfg
 
 必须选项:
