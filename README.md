@@ -49,15 +49,11 @@ alipay.get_charge(order, pay_type) # => Object { method, charset, url, params }
 
 # 验证请求数据签名
 # params 为 body, 参见 example
-alipay.verify(params) # => Promise
-.then (verified) ->
-  if verified
-    # verfiy 需要针对自己的业务系统做些额外验证, 比如金额是否匹配等, 详见以下支付宝文档中 "异步返回结果验签" 的第五步:
-    # https://doc.open.alipay.com/docs/doc.htm?spm=a219a.7629140.0.0.baE541&treeId=193&articleId=105902&docType=1#s7
-    # 响应 "success" 字符串给 alipay
-    # 然后处理自己的业务逻辑
-  else
-    # ...
+is_ok = alipay.verify(params) # => Boolean
+# verfiy 后续需要针对自己的业务系统做些额外验证, 比如金额是否匹配等, 详见以下支付宝文档中 "异步返回结果验签" 的第五步:
+# https://doc.open.alipay.com/docs/doc.htm?spm=a219a.7629140.0.0.baE541&treeId=193&articleId=105902&docType=1#s7
+# 响应 "success" 字符串给 alipay
+# 然后处理自己的业务逻辑
 
 # 退款
 # request_params 对象内容见: 
@@ -79,13 +75,13 @@ alipay.query_refund(request_params) # => axios Promise
 
 # 转账
 # request_params 对象内容见: 
-http://doc.open.alipay.com/docs/api.htm?spm=a219a.7395905.0.0.5tfkBr&docType=4&apiId=1321 
+# http://doc.open.alipay.com/docs/api.htm?spm=a219a.7395905.0.0.5tfkBr&docType=4&apiId=1321 
 # 文档的 "请求参数" 一节
 alipay.transfer(request_params) # => axios Promise
 
 # 转账查询
 # request_params 对象内容见: 
-https://doc.open.alipay.com/docs/api.htm?spm=a219a.7395905.0.0.NQF6tW&docType=4&apiId=1322
+# https://doc.open.alipay.com/docs/api.htm?spm=a219a.7395905.0.0.NQF6tW&docType=4&apiId=1322
 # 文档的 "请求参数" 一节
 alipay.transfer_query(request_params) # => axios Promise
 ```
@@ -167,12 +163,11 @@ router.use "/pay", (req, res) ->
 # 接收异步通知
 hook = express()
 hook.post "/hook/notify", (req, res) ->
-  alipay.verify req.body
-  .then (verify_ret) ->
-    return res.end "failure" unless verify_ret
-    # if logic procss successfully
-    res.end "success"
-    # custom logic
+  is_ok = alipay.verify req.body
+  return res.end "failure" unless is_ok
+  # if logic procss successfully
+  res.end "success"
+  # custom logic
 ```
 
 ## 其他资料

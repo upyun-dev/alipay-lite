@@ -37,6 +37,8 @@ class Alipay
 
   constructor: (cfg = {}) ->
     @cfg = Object.assign {}, @basic_cfg, cfg
+    @cfg.app_private_key = @cfg.app_private_key.toString "utf8"
+    @cfg.alipay_public_key = @cfg.alipay_public_key.toString "utf8"
 
     for attr_name in ["notify_url", "return_url"] when attr_name of @cfg
       { protocol, hostname } = url.parse @cfg[attr_name]
@@ -53,8 +55,7 @@ class Alipay
   verify: (params) ->
     { sign } = params
     params = @wash params, ["sign", "sign_type"]
-    decoded_sign = @btoa sign
-    @signature_verify decoded_sign, @concat @sort params
+    @signature_verify sign, @concat @sort params
 
   # 退款
   refund: (biz_content) -> @common_request biz_content, "REFUND"
@@ -122,9 +123,6 @@ class Alipay
   signature_verify: (signature, plaintext) ->
     verfied_stream = crypto.createVerify @digest_algorithms[@cfg.sign_type]
     verfied_stream.update plaintext
-    verfied_stream.verify @cfg.alipay_public_key, signature
-
-  btoa: (base64_str) -> Buffer(base64_str, "base64").toString "utf-8"
-  atob: (text) -> Buffer(text).toString "base64"
+    verfied_stream.verify @cfg.alipay_public_key, signature, "base64"
 
 module.exports = Alipay
