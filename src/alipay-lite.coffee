@@ -44,10 +44,16 @@ class Alipay
       { protocol, hostname } = url.parse @cfg[attr_name]
       @cfg[attr_name] = "#{@cfg.host}#{@cfg[attr_name]}" unless hostname? and protocol?
 
-  # 创建订单
+  # 发起创建订单请求, 并返回支付界面
+  pay: (biz_content, pay_type) ->
+    { url, params } = @get_charge biz_content, pay_type
+    axios.post url, params, responseType: "stream"
+    .then ({ data }) -> data
+
+  # 创建订单, 需要开发者手动构造 HTTP POST 请求
   get_charge: (biz_content, pay_type) ->
     method: "POST"
-    url: @cfg.url
+    url: "#{@cfg.url}?charset=#{@cfg.charset}"
     charset: @cfg.charset
     params: @create_order biz_content, pay_type
 
