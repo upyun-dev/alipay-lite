@@ -47,6 +47,9 @@ alipay = new Alipay cfg
 # + APP_PAY: https://doc.open.alipay.com/docs/doc.htm?spm=a219a.7629140.0.0.Hqeal6&treeId=193&articleId=105465&docType=1
 alipay.get_charge(order, pay_type) # => Object { method, charset, url, params }
 
+# 或者通过 pay 方法直接生成 http 请求获取支付页面
+alipay.pay(order, pay_type) # => Promise (response stream)
+
 # 验证请求数据签名
 # params 为 body, 参见 example
 is_ok = alipay.verify(params) # => Boolean
