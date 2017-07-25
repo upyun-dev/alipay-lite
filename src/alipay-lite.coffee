@@ -1,3 +1,4 @@
+querystring = require "querystring"
 crypto = require "crypto"
 moment = require "moment"
 axios = require "axios"
@@ -47,7 +48,9 @@ class Alipay
   # 发起创建订单请求, 并返回支付界面
   pay: (biz_content, pay_type) ->
     { url, params } = @get_charge biz_content, pay_type
-    axios.post url, params, responseType: "stream"
+    # axios 默认序列化对象为 JSON format, 并将 Content-Type 设置为 "application/json",
+    # 这里用 querystring 转换为 "application/x-www-form-urlencoded"
+    axios.post url, querystring.stringify(params), responseType: "stream"
     .then ({ data }) -> data
 
   # 创建订单, 需要开发者手动构造 HTTP POST 请求
