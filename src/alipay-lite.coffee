@@ -1,7 +1,8 @@
-querystring = require "querystring"
+# querystring = require "querystring"
+request = require "request"
 crypto = require "crypto"
 moment = require "moment"
-axios = require "axios"
+# axios = require "axios"
 url = require "url"
 
 # 轻量级 alipay sdk, 支持 app 支付, 手机/电脑网站支付, 支付查询, 退款, 退款查询
@@ -50,8 +51,10 @@ class Alipay
     { url, params } = @get_charge biz_content, pay_type
     # axios 默认序列化对象为 JSON format, 并将 Content-Type 设置为 "application/json",
     # 这里用 querystring 转换为 "application/x-www-form-urlencoded"
-    axios.post url, querystring.stringify(params), responseType: "stream"
-    .then ({ data }) -> data
+    # axios.post url, qs.stringify(params),
+    #   responseType: "stream"
+    # .then ({ data }) -> data
+    request.post url: url, form: params
 
   # 创建订单, 需要开发者手动构造 HTTP POST 请求
   get_charge: (biz_content, pay_type) ->
@@ -91,7 +94,8 @@ class Alipay
 
     params = @wash params, ["url", "host", "app_private_key", "alipay_public_key", "notify_url", "return_url"]
     params.sign = @sign params
-    axios.get @cfg.url, { params }
+    # axios.get @cfg.url, { params }
+    request.get(url: @cfg.url, qs: params)
 
   wash: (object, attrs_to_remove = []) ->
     cloned = {}
