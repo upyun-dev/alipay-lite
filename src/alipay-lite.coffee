@@ -54,7 +54,8 @@ class Alipay
     # axios.post url, qs.stringify(params),
     #   responseType: "stream"
     # .then ({ data }) -> data
-    request.post url: url, form: params
+    new Promise (resolve) ->
+      resolve request.post url: url, form: params
 
   # 创建订单, 需要开发者手动构造 HTTP POST 请求
   get_charge: (biz_content, pay_type) ->
@@ -95,7 +96,14 @@ class Alipay
     params = @wash params, ["url", "host", "app_private_key", "alipay_public_key", "notify_url", "return_url"]
     params.sign = @sign params
     # axios.get @cfg.url, { params }
-    request.get(url: @cfg.url, qs: params)
+    new Promise (resolve, reject) =>
+      request.get(url: @cfg.url, qs: params
+      , (err, resp, body) ->
+        if err?
+          reject err
+        else
+          resolve body
+      )
 
   wash: (object, attrs_to_remove = []) ->
     cloned = {}

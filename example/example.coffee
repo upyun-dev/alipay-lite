@@ -34,7 +34,7 @@ router.use "/pay", (req, res) ->
 
   alipay
   .pay order, "PAGE_PAY"
-  .pipe res
+  .then (resp) -> resp.pipe res
 
 paymentserver = createServer router
 paymentserver.listen 65532
