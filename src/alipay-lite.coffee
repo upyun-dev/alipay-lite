@@ -48,14 +48,16 @@ class Alipay
 
   # 发起创建订单请求, 并返回支付界面
   pay: (biz_content, pay_type) ->
-    { url, params } = @get_charge biz_content, pay_type
+    charge = @get_charge biz_content, pay_type
     # axios 默认序列化对象为 JSON format, 并将 Content-Type 设置为 "application/json",
     # 这里用 querystring 转换为 "application/x-www-form-urlencoded"
     # axios.post url, qs.stringify(params),
     #   responseType: "stream"
     # .then ({ data }) -> data
     new Promise (resolve) ->
-      resolve request.post url: url, form: params
+      resolve request.post 
+                url: charge.url
+                form: charge.params
 
   # 创建订单, 需要开发者手动构造 HTTP POST 请求
   get_charge: (biz_content, pay_type) ->
